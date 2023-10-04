@@ -6,9 +6,10 @@ config = {
     "useAS7341": True,
     "useLTR390": True,
     "useLTR329": False,
-    "useAPDS9960": True,
-    "useTSL2591": True,
+    "useAPDS9960": False,
+    "useTSL2591": False,
     "useMMC5603": True,
+    "useSHTC3": True,
     "useMQTT": False,
     "useAdafruitIO": True
         }

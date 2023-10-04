@@ -42,7 +42,6 @@ to refine this project so that we'll be able to collect and analyze even more da
 
 You'll need the following parts:
 
-**Required**
 - [Raspberry Pi Pico W](https://www.adafruit.com/product/5544) Other CircuitPython compatible boards should work, but I haven't tested any.
 Since the Pico W doesn't have a Stemma QT plug, you'll need a way to connect it to the sensor breakouts. I chose to use a breadboard with
 a Stemma QT to male headers connector. If you're using a board with a Stemma QT plug, then you can skip the next two items.
@@ -56,6 +55,10 @@ a Stemma QT to male headers connector. If you're using a board with a Stemma QT 
 - [Swirly](https://www.adafruit.com/product/5774) This is optional, but it's a nice platform for mounting everything.
 - [Nylon M2.5 screws](https://www.adafruit.com/product/3658) If you're using the Swirly, then you'll need these to screw the breakouts to it.
 - [Neutral Density (ND9) Filter](https://www.amazon.com/Lighting-Neutral-Density-Flashlight-Photography/dp/B08818V6Y2) Direct sunlight is too much for the AS7341 and LTR390 to read directly, so you'll need some ND9 to attenuate it. ND9 blocks light fairly evenly across the infrared through UV spectrum and it blocks 7/8's of the light coming in.
+
+The code also has support for Adafruit's LTR329, TSL2591, and APDS9960 sensors, but those are disabled by default in config.py.
+While testing, I found that the code crashed if using the LTR329 and it was exposed to direct sunlight, so I don't recommend using
+that sensor.
 
 
 ## Setting up the hardware

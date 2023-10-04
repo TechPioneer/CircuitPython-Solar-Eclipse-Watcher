@@ -21,17 +21,24 @@ import adafruit_requests
 import adafruit_mmc56x3
 from adafruit_io.adafruit_io import IO_HTTP, AdafruitIO_RequestError
 
+if (config['useSHTC3']):
+    import adafruit_shtc3
+
 def init():
     global as7341
     global ltr390
     global ltr329
     global apds9960
     global tsl2591
+    global mmc5603
+    
     global mqttTopic7341
     global mqttTopic390
     global mqttTopic9960
     global mqttTopic329
     global mqttTopic2591
+    global mqttTopic5603
+    global mqttTopicSHTC3
     global sampleTime
     global mqttClient
     global io
@@ -60,6 +67,10 @@ def init():
     if (config['useMMC5603']):
         mmc5603 = adafruit_mmc56x3.MMC5603(i2c0)
 
+    if (config['useSHTC3']):
+        global shtc3
+        shtc3 = adafruit_shtc3.SHTC3(i2c0)
+
     sampleTime = config['sampleTime']
     wifi.radio.connect(secrets['ssid'], secrets['password'])
     pool = socketpool.SocketPool(wifi.radio)
@@ -86,6 +97,8 @@ def init():
         mqttTopic329 = f"{mqttTopic}/329"
         mqttTopic2591 = f"{mqttTopic}/2591"
         mqttTopic5603 = f"{mqttTopic}/5603"
+        if (config['useSHTC3']):
+            mqttTopicSHTC3 = f"{mqttTopic}/shtc3"
 
         mqttClient = MQTT.MQTT(
             broker=mqttBrokerIp,
@@ -128,6 +141,10 @@ def resetVariables():
     global value_5603_x
     global value_5603_y
     global value_5603_z
+    global value_5603_temperature
+    
+    global value_shtc3_temperature
+    global value_shtc3_humidity
 
     value_7341_415 = 0
     value_7341_445 = 0
@@ -158,6 +175,9 @@ def resetVariables():
     value_5603_x = 0
     value_5603_y = 0
     value_5603_z = 0
+    
+    value_shtc3_temperature = 0
+    value_shtc3_humidity = 0
     
     count = 0
     lastSendTime = time.time()
@@ -209,6 +229,10 @@ try:
             value_5603_z += z
             value_5603_temperature += mmc5603.temperature
 
+        if (config['useSHTC3']):
+            value_shtc3_temperature += shtc3.temperature
+            value_shtc3_humidity += shtc3.relative_humidity
+
         if ((time.time() - lastSendTime) > sampleTime):
             if(count > 0):
                 if (config['useAdafruitIO']):
@@ -253,6 +277,10 @@ try:
                         mqttClient.publish(f"{mqttTopic5603}/y", value_5603_y/count)
                         mqttClient.publish(f"{mqttTopic5603}/z", value_5603_z/count)
                         mqttClient.publish(f"{mqttTopic5603}/temperature", value_5603_temperature/count)
+
+                    if (config['useSHTC3']):
+                        mqttClient.publish(f"{mqttTopicSHTC3}/temperature", value_shtc3_temperature/count)
+                        mqttClient.publish(f"{mqttTopicSHTC3}/humidity", value_shtc3_humidity/count)
 
                 resetVariables()
 
