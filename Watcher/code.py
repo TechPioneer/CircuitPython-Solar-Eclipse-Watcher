@@ -13,9 +13,6 @@ import busio
 import analogio
 import adafruit_as7341
 import adafruit_ltr390
-import adafruit_apds9960.apds9960
-import adafruit_ltr329_ltr303 as adafruit_ltr329
-import adafruit_tsl2591
 import supervisor
 import adafruit_requests
 import adafruit_mmc56x3
@@ -27,16 +24,10 @@ if (config['useSHTC3']):
 def init():
     global as7341
     global ltr390
-    global ltr329
-    global apds9960
-    global tsl2591
     global mmc5603
     
     global mqttTopic7341
     global mqttTopic390
-    global mqttTopic9960
-    global mqttTopic329
-    global mqttTopic2591
     global mqttTopic5603
     global mqttTopicSHTC3
     global sampleTime
@@ -45,24 +36,13 @@ def init():
     global feed_names
     
     i2c0 = busio.I2C(board.GP1, board.GP0, frequency=100000)
-    i2c1 = busio.I2C(board.GP3, board.GP2, frequency=100000)
+    #i2c1 = busio.I2C(board.GP3, board.GP2, frequency=100000)
 
     if (config['useAS7341']):
         as7341 = adafruit_as7341.AS7341(i2c0)
 
     if (config['useLTR390']):
         ltr390 = adafruit_ltr390.LTR390(i2c0)
-        
-    if (config['useLTR329']):
-        ltr329 = adafruit_ltr329.LTR329(i2c0)
-
-    if (config['useAPDS9960']):
-        apds9960 = adafruit_apds9960.apds9960.APDS9960(i2c1)
-        apds9960.enable_color = True
-
-    if (config['useTSL2591']):
-        tsl2591 = adafruit_tsl2591.TSL2591(i2c1)
-        tsl2591.gain = adafruit_tsl2591.GAIN_LOW
         
     if (config['useMMC5603']):
         mmc5603 = adafruit_mmc56x3.MMC5603(i2c0)
@@ -93,9 +73,6 @@ def init():
 
         mqttTopic7341 = f"{mqttTopic}/7341"
         mqttTopic390 = f"{mqttTopic}/390"
-        mqttTopic9960 = f"{mqttTopic}/9960"
-        mqttTopic329 = f"{mqttTopic}/329"
-        mqttTopic2591 = f"{mqttTopic}/2591"
         mqttTopic5603 = f"{mqttTopic}/5603"
         if (config['useSHTC3']):
             mqttTopicSHTC3 = f"{mqttTopic}/shtc3"
@@ -126,18 +103,6 @@ def resetVariables():
     global value_390_light
     global value_390_uv
     
-    global value_9960_red
-    global value_9960_green
-    global value_9960_blue
-    global value_9960_clear
-    
-    global value_329_full
-    global value_329_ir
-    
-    global value_2591_visible
-    global value_2591_infrared
-    global value_2591_full
-    
     global value_5603_x
     global value_5603_y
     global value_5603_z
@@ -160,21 +125,10 @@ def resetVariables():
     value_390_light = 0
     value_390_uv = 0
     
-    value_9960_red = 0
-    value_9960_green = 0
-    value_9960_blue = 0
-    value_9960_clear = 0
-    
-    value_329_full = 0
-    value_329_ir = 0
-    
-    value_2591_visible = 0
-    value_2591_infrared = 0
-    value_2591_full = 0
-    
     value_5603_x = 0
     value_5603_y = 0
     value_5603_z = 0
+    value_5603_temperature = 0
     
     value_shtc3_temperature = 0
     value_shtc3_humidity = 0
@@ -205,22 +159,6 @@ try:
         if (config['useLTR390']):
             value_390_light += ltr390.uvs
             value_390_uv += ltr390.light
-
-        if (config['useAPDS9960']):
-            r, g, b, c = apds9960.color_data
-            value_9960_red += r
-            value_9960_green += g
-            value_9960_blue += b
-            value_9960_clear += c
-            
-        if (config['useLTR329']):
-            value_329_full += ltr329.visible_plus_ir_light
-            value_329_ir += ltr329.ir_light
-
-        if (config['useTSL2591']):
-            value_2591_visible += tsl2591.visible
-            value_2591_infrared += tsl2591.infrared
-            value_2591_full += tsl2591.full_spectrum
 
         if (config['useMMC5603']):
             x, y, z = mmc5603.magnetic
@@ -257,21 +195,6 @@ try:
                         mqttClient.publish(f"{mqttTopic390}/light", value_390_light/count)
                         mqttClient.publish(f"{mqttTopic390}/uv", value_390_uv/count)
 
-                    if (config['useAPDS9960']):
-                        mqttClient.publish(f"{mqttTopic9960}/red", value_9960_red/count)
-                        mqttClient.publish(f"{mqttTopic9960}/green", value_9960_green/count)
-                        mqttClient.publish(f"{mqttTopic9960}/blue", value_9960_blue/count)
-                        mqttClient.publish(f"{mqttTopic9960}/clear", value_9960_clear/count)
-
-                    if (config['useLTR329']):
-                        mqttClient.publish(f"{mqttTopic329}/full", value_329_full/count)
-                        mqttClient.publish(f"{mqttTopic329}/ir", value_329_ir/count)
-
-                    if (config['useTSL2591']):
-                        mqttClient.publish(f"{mqttTopic2591}/visible", value_2591_visible/count)
-                        mqttClient.publish(f"{mqttTopic2591}/infrared", value_2591_infrared/count)
-                        mqttClient.publish(f"{mqttTopic2591}/full", value_2591_full/count)
-                        
                     if (config['useMMC5603']):
                         mqttClient.publish(f"{mqttTopic5603}/x", value_5603_x/count)
                         mqttClient.publish(f"{mqttTopic5603}/y", value_5603_y/count)

@@ -5,11 +5,8 @@ config = {
     "sampleTime": 30,
     "useAS7341": True,
     "useLTR390": True,
-    "useLTR329": False,
-    "useAPDS9960": False,
-    "useTSL2591": False,
     "useMMC5603": True,
     "useSHTC3": True,
-    "useMQTT": False,
+    "useMQTT": True,
     "useAdafruitIO": True
         }

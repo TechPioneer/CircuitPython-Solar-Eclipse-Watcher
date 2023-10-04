@@ -56,11 +56,6 @@ a Stemma QT to male headers connector. If you're using a board with a Stemma QT 
 - [Nylon M2.5 screws](https://www.adafruit.com/product/3658) If you're using the Swirly, then you'll need these to screw the breakouts to it.
 - [Neutral Density (ND9) Filter](https://www.amazon.com/Lighting-Neutral-Density-Flashlight-Photography/dp/B08818V6Y2) Direct sunlight is too much for the AS7341 and LTR390 to read directly, so you'll need some ND9 to attenuate it. ND9 blocks light fairly evenly across the infrared through UV spectrum and it blocks 7/8's of the light coming in.
 
-The code also has support for Adafruit's LTR329, TSL2591, and APDS9960 sensors, but those are disabled by default in config.py.
-While testing, I found that the code crashed if using the LTR329 and it was exposed to direct sunlight, so I don't recommend using
-that sensor.
-
-
 ## Setting up the hardware
 
 TODO
@@ -87,5 +82,6 @@ You know the drill:
 - Wear your sunscreen.
 - Eat your vegetables.
 
+[Eclipse Glasses](https://www.amazon.com/gp/product/B0C2Y3SFVS/)
 
 ## 
