@@ -56,9 +56,12 @@ a Stemma QT to male headers connector. If you're using a board with a Stemma QT 
 - [Nylon M2.5 screws](https://www.adafruit.com/product/3658) If you're using the Swirly, then you'll need these to screw the breakouts to it.
 - [Neutral Density (ND9) Filter](https://www.amazon.com/Lighting-Neutral-Density-Flashlight-Photography/dp/B08818V6Y2) Direct sunlight is too much for the AS7341 and LTR390 to read directly, so you'll need some ND9 to attenuate it. ND9 blocks light fairly evenly across the infrared through UV spectrum and it blocks 7/8's of the light coming in.
 
+You'll also need a project box that you can mount the ND9 as a light filter. In the ProjectBox directory are stl files suitable
+for 3D printing, as well as scad files that can be edited in OpenSCAD, if you want to customize it.
+
 ## Setting up the hardware
 
-TODO
+See the wiki: https://github.com/TechPioneer/CircuitPython-Solar-Eclipse-Watcher/wiki/Hardware-Setup
 
 ## Setting up the code
 
