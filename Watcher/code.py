@@ -42,9 +42,8 @@ def init():
     if (config['useSD']):
         import sdcardio
         import storage
-        spi = busio.SPI(board.GP2, board.GP4, board.GP3)  # SCK, MISO (RX), MOSI (TX)
-        cs = digitalio.DigitalInOut(board.GP5)  # CS
-        sdcard = sdcardio.SDCard(spi, cs)
+        spi = busio.SPI(clock=board.GP10, MISO=board.GP12, MOSI=board.GP11)  # SCK, MISO (RX), MOSI (TX)
+        sdcard = sdcardio.SDCard(spi, board.GP13)
         vfs = storage.VfsFat(sdcard)
         storage.mount(vfs, "/sd")
     
@@ -92,7 +91,7 @@ def init():
             SensorItem(read_func=lambda sensor: sensor.channel_590nm, mqtt_topic=f"{mqttTopic}/7341/590"),
             SensorItem(read_func=lambda sensor: sensor.channel_630nm, mqtt_topic=f"{mqttTopic}/7341/630"),    SensorItem(read_func=lambda sensor: sensor.channel_680nm, mqtt_topic=f"{mqttTopic}/7341/680"),
         ]
-        as7341_sensor = Sensor(i2c=i2c0, setup_func=as7341_setup_func, items=as7341_items)        
+        as7341_sensor = Sensor(i2c=i2c0, setup_func=as7341_setup_func, items=as7341_items)
         sensors.append(as7341_sensor)
 
     if (config['useLTR390']):
@@ -138,7 +137,7 @@ def resetVariables():
     
     for sensor in sensors:
         for item in sensor.items:
-            item.accumulated_value = 0    
+            item.accumulated_value = 0
     
     count = 0
     lastSendTime = time.time()
@@ -160,10 +159,11 @@ try:
 #                if (config['useAdafruitIO']):
 #                    print(f"sending {value_7341_clear}")
 #                    for z in range(1):
-#                        io.send_data(feed_names[z]["key"], value_7341_clear) 
+#                        io.send_data(feed_names[z]["key"], value_7341_clear)
                 
                 if (config['useSD']):
-                    log_data = ""
+                    uptime = time.monotonic()
+                    log_data = f"Uptime: {uptime}, "
                     for sensor in sensors:
                         for item in sensor.items:
                             value = item.accumulated_value / count
@@ -175,6 +175,8 @@ try:
                             value = item.accumulated_value / count
                             mqttClient.publish(item.mqtt_topic, value)
                             
+            resetVariables()
+
         time.sleep(.5)
 except Exception as e:
     print(f"Caught exception: Type: {type(e)} Args: {e.args} Msg: {e}")
