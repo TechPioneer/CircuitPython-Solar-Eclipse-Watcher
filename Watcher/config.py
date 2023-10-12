@@ -8,5 +8,6 @@ config = {
     "useMMC5603": True,
     "useSHTC3": True,
     "useMQTT": True,
-    "useAdafruitIO": True
+    "useSD": True,
+    "useAdafruitIO": False
         }

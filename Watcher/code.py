@@ -39,6 +39,15 @@ def init():
     wifi.radio.connect(secrets['ssid'], secrets['password'])
     pool = socketpool.SocketPool(wifi.radio)
     
+    if (config['useSD']):
+        import sdcardio
+        import storage
+        spi = busio.SPI(board.GP2, board.GP4, board.GP3)  # SCK, MISO (RX), MOSI (TX)
+        cs = digitalio.DigitalInOut(board.GP5)  # CS
+        sdcard = sdcardio.SDCard(spi, cs)
+        vfs = storage.VfsFat(sdcard)
+        storage.mount(vfs, "/sd")
+    
     if (config['useMQTT']):
         mqttTopic = config['mqttTopic']
         mqttBrokerIp = config['mqttBrokerIp']
@@ -53,6 +62,17 @@ def init():
         mqttClient.will_set(mqttTopic, "OFFLINE", 1)
         mqttClient.connect(keep_alive = sampleTime * 2 + 5)
         
+    if (config['useAdafruitIO']):
+        requests = adafruit_requests.Session(pool, ssl.create_default_context())
+        io = IO_HTTP(secrets['aio_username'], secrets['aio_key'], requests)
+        
+        try:
+            aio_feed_7341 = io.get_feed("pi7341")
+        except AdafruitIO_RequestError:
+            aio_feed_7341 = io.create_new_feed("pi7341")
+            
+        feed_names = [aio_feed_7341]
+
     i2c0 = busio.I2C(board.GP1, board.GP0, frequency=100000)
     #i2c1 = busio.I2C(board.GP3, board.GP2, frequency=100000)
     
@@ -107,17 +127,10 @@ def init():
         shtc3_sensor = Sensor(i2c=i2c0, setup_func=shtc3_setup_func, items=shtc3_items)
         sensors.append(shtc3_sensor)
 
-    if (config['useAdafruitIO']):
-        requests = adafruit_requests.Session(pool, ssl.create_default_context())
-        io = IO_HTTP(secrets['aio_username'], secrets['aio_key'], requests)
-        
-        try:
-            aio_feed_7341 = io.get_feed("pi7341")
-        except AdafruitIO_RequestError:
-            aio_feed_7341 = io.create_new_feed("pi7341")
-            
-        feed_names = [aio_feed_7341]
 
+def log_to_sd(data):
+    with open("/sd/log.txt", "a") as f:
+        f.write(data + "\n")
 
 def resetVariables():
     global count
@@ -149,13 +162,19 @@ try:
 #                    for z in range(1):
 #                        io.send_data(feed_names[z]["key"], value_7341_clear) 
                 
+                if (config['useSD']):
+                    log_data = ""
+                    for sensor in sensors:
+                        for item in sensor.items:
+                            value = item.accumulated_value / count
+                            log_data += f"{item.mqtt_topic}: {value}, "
+                    log_to_sd(log_data.rstrip(", "))
                 if (config['useMQTT']):
                     for sensor in sensors:
                         for item in sensor.items:
-                            mqttClient.publish(item.mqtt_topic, item.accumulated_value / count)
-
-                resetVariables()
-
+                            value = item.accumulated_value / count
+                            mqttClient.publish(item.mqtt_topic, value)
+                            
         time.sleep(.5)
 except Exception as e:
     print(f"Caught exception: Type: {type(e)} Args: {e.args} Msg: {e}")
